@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
+        integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment-with-locales.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="estilos.css">
+    <title>Todas las notificaciones</title>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Todas las notificaciones</h2>
+        <hr>
+        <button class="btn-opciones btn-nuevo" onclick="irA('../nuevo/nuevo.html')">
+            <i class="fa-solid fa-plus"></i>
+            Nueva Notificacion
+        </button>
+        <br>
+        <br>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nro.</th>
+                    <th>Titulo</th>
+                    <th>Descripcion</th>
+                    <th>Tipo</th>
+                    <th>Unidad</th>
+                    <th>Fecha de Emision</th>
+                    <th>Fecha de Registro</th>
+                    <th>Opciones</th>
+                </tr>
+            </thead>
+            <tbody id="filas">
+
+
+            </tbody>
+        </table>
+    </div>
+    <div class="container">
+        <form onsubmit="enviar(event)">
+            <h2>Editar notificacion</h2>
+            <div class="form-group">
+                <label for="titulo">Titulo:</label>
+                <input type="text" name="titulo" id="titulo">
+            </div>
+            <div class="form-group">
+                <label for="descripcion">Descripcion:</label>
+                <textarea name="descripcion" id="descripcion" cols="30" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="tipo">Tipo:</label>
+                <select name="tipo" id="tipo">
+                    <option value="">Tipo de notificacion...</option>
+                    <option value="todos">Todos</option>
+                    <option value="DSA">DSA</option>
+                    <option value="datacenter">Datacenter</option>
+                    <option value="DAF">DAF</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="fecha">Fecha:</label>
+                <input type="datetime-local" name="fecha" id="fecha">
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Update  ">
+            </div>
+        </form>
+
+    </div>
+</body>
+<script>
+    var socket;
+    window.onload = () => {
+        const token = localStorage.getItem('token')
+        console.log(token)
+        if (token === null) {
+            window.location.href = '../sesion/sesion.html'
+        }
+    }
+
+    window.onload = () => {
+        const servidor_url = 'ws://127.0.0.1:8008'
+        socket = new WebSocket(servidor_url)
+        socket.onopen = (e) => {
+            console.log('Se realizo la conexion->', e)
+            socket.send(JSON.stringify({ accion: 'listar-notificaciones' }))
+        }
+
+        socket.onerror = (e) => {
+            console.warn('errorrrr->', e)
+        }
+
+        socket.onmessage = (info) => {
+            const datosFormateados = JSON.parse(info.data)
+            console.log('----->', datosFormateados)
+            renderizarTabla(datosFormateados)
+        }
+    }
+    const enviar = (e) => {
+            e.preventDefault()
+            if (confirm('esta seguro de registrar??')) {
+                // const Update= {
+                //     titulo: e.target.titulo.value,
+                //     descripcion: e.target.descripcion.value,
+                //     tipo: e.target.tipo.value,
+                //     fecha: e.target.fecha.value,
+                // }
+                // console.log(Update)
+            
+            // const token = localStorage.getItem('token')
+            // console.log(token)
+            const actualizar = {
+                // tipo: e.target.tipo.value,
+                titulo: e.target.titulo.value,
+                    descripcion: e.target.descripcion.value,
+                    tipo: e.target.tipo.value,
+                    fecha: e.target.fecha.value,
+                // datos: Update,
+                accion: "update-notificacion",
+                id: localStorage.getItem('identificador'),
+            }
+            console.log('ENVIAR-->',actualizar )
+            
+            const ws = new WebSocket('ws://127.0.0.1:8008')
+            ws.onopen = () => {
+                console.info('Conexion establecida')
+                ws.send(JSON.stringify(actualizar))
+            }
+                
+            ws.onerror = () => {
+                alert("Hubo un problema en la conexion con el servidor... intentelo mas tarde")
+            } 
+
+                // ws.onmessage = (data) => {
+                //     console.log('DATOS RECIBIDOS-->', data)
+                //     const respuesta = JSON.parse(data.data)
+                //     if (respuesta.ok === true) {
+                //         alert(respuesta.msg)
+                //         window.location.href = '../listar/listar.html'
+                //     }
+                //     else{
+                //         if(respuesta.tipo!=='emision'){
+                            
+                //             alert(respuesta.msg)
+                //             if(respuesta.msg === 'Usuario invalido') {
+                //                 localStorage.removeItem('token')
+                //                 return window.location.href = '../sesion/sesion.html' 
+                //             }
+                //         }
+                //     }
+
+                // }
+        }
+    }
+    console.log("estos son los datos nuevos",enviar)
+    const renderizarTabla = (datos) => {
+        let filas = document.getElementById('filas')
+        let filasFormateadas = datos.map((notificacion,item) => `
+            <tr>
+                <td>${item+1}</td>
+                <td>${notificacion.titulo}</td>
+                <td>${notificacion.descripcion}</td>
+                <td>${notificacion.tipo}</td>
+                <td>${notificacion.unidad}</td>
+                <td>${notificacion.fechaEmision}</td>
+                <td>${notificacion.fechaRegistro}</td>
+                <td>
+                    <button onclick=editarNotificacion('${notificacion.id}'); class="btn-opciones btn-editar">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        Editar
+                    </button>
+                    <button onclick=eliminarNotificacion('${notificacion.id}'); class="btn-opciones btn-eliminar">
+                        <i class="fa-solid fa-trash"></i>
+                        Eliminar
+                    </button>
+                </td>
+            </tr>
+        `)
+        filas.innerHTML = filasFormateadas.join('');
+    }
+
+
+    function eliminarNotificacion(id) {
+        console.log(id)
+        const enviar = {
+            accion: "eliminar-notificacion",
+            id: id,
+            token: localStorage.getItem('token')
+        }
+        socket.send(JSON.stringify(enviar))
+        socket.onmessage = (info) => {
+            const datosFormateados = JSON.parse(info.data);
+            console.log('----->', datosFormateados);
+            alert(datosFormateados.msg)
+            if (datosFormateados.ok) {
+                socket.send(JSON.stringify({ accion: 'listar-notificaciones' }))
+                socket.onmessage = (info) => {
+                    const datosFormateados = JSON.parse(info.data);
+                    console.log('----->', datosFormateados);
+                    renderizarTabla(datosFormateados)
+                }
+            }
+
+        }
+    }
+
+    const titulo= document.querySelector('#titulo')
+    const descripcion= document.querySelector('#descripcion')
+    const tipo= document.querySelector('#tipo')
+    const fecha=document.querySelector('#fecha')
+
+    function editarNotificacion(id) {
+        console.log(id)
+        const identificador=localStorage.setItem('identificador',id)
+        const enviar = {
+            accion: "editar-notificacion",
+            id: id,
+            token: localStorage.getItem('token')
+        }
+        console.log("editar datos");
+        socket.send(JSON.stringify(enviar))
+        // window.location.href = '../editar/editar.html'
+        socket.onmessage = (info) => {
+            const datosFormateados = JSON.parse(info.data);
+            console.log('----->', datosFormateados);
+            // alert(datosFormateados.msg)
+            titulo.value=datosFormateados.titulo
+            descripcion.value=datosFormateados.descripcion
+            switch (datosFormateados.tipo) {
+                case 'todos':
+                    tipo.value=datosFormateados.tipo
+                    console.log("todos");
+                    break;
+                case 'DSA':
+                    tipo.value=datosFormateados.tipo
+                    console.log("DSA");
+                    break;
+                case 'datacenter':
+                    tipo.value=datosFormateados.tipo
+                    console.log("datacenter");
+                    break;
+                case 'DAF':
+                    tipo.value=datosFormateados.tipo
+                    console.log("DAF");
+                    break;
+                default:
+                    break;
+                    todos
+            }
+            
+            // fecha.value=moment(datosFormateados.fecha).format('yyyy-MM-ddThh:mm:ss.SSS');
+            // if (datosFormateados.ok) {
+            //     socket.send(JSON.stringify({ accion: 'editar-notificaciones' }))
+            //     socket.onmessage = (info) => {
+            //         const datosFormateados = JSON.parse(info.data);
+            //         console.log('----->', datosFormateados);
+            //         renderizarTabla(datosFormateados)
+            //     }
+            // }
+
+        }
+    }
+
+
+
+    const irA = (ruta) => {
+        return window.location.href = ruta
+    }
+
+
+</script>
+
+</html>

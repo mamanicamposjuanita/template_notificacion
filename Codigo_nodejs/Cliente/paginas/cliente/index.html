@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+
+    <script>
+        window.onload = () => {
+            ws = new WebSocket('ws://192.168.1.105:8008')
+            ws.onopen = () => {
+                alert("se conecto")
+                console.info('Conexion establecida')
+                // document.write("holas")
+            }
+
+            ws.onerror = () => {
+                alert("Hubo un problema en la conexion con el servidor... intentelo mas tarde")
+            }
+
+            ws.onmessage = (data) => {
+                console.log(data)
+                const respuesta = JSON.parse(data.data)
+                if(respuesta.tipo === 'emision')
+                    return alert(respuesta.titulo + ': ' + respuesta.descripcion)
+            }
+    }
+
+    </script>
+</body>
+
+</html>

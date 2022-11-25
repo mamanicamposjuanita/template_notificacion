@@ -1,0 +1,25 @@
+version: "3.5"
+services:
+  app:
+    build: .
+    links:
+      - mongo
+    ports:
+      - "8008:8008"
+      - "3000:3000"
+    environment: 
+      - MONGODB_CONNSTRING=mongodb://root:example/notificacion
+    volumes:
+      - .:/opt/app
+      - /opt/app/node_modules
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: notificacion
+volumes:
+  mongodata:
