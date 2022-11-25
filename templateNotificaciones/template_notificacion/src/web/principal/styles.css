@@ -1,0 +1,77 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.contenedor {
+    padding: 30px;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: flex-start;
+}
+
+.card {
+    width: 350px;
+    height: 150px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: rgb(16, 7, 99);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    cursor: pointer;
+    animation: animacion-salida 0.5s;
+}
+
+.card>a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.5em;
+}
+
+@keyframes animacion-entrada {
+    from {
+        transform: scale(1); 
+        box-shadow: none;
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+    }
+
+    to {
+        transform: scale(1.05);
+        box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
+        -webkit-box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
+        -moz-box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
+    }
+
+}
+
+@keyframes animacion-salida {
+    from {
+        transform: scale(1.05);
+        box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
+        -webkit-box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
+        -moz-box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
+    }
+    to {
+        transform: scale(1); 
+        box-shadow: none;
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+    } 
+
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
+    -webkit-box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
+
+    animation: animacion-entrada 0.5s;
+}

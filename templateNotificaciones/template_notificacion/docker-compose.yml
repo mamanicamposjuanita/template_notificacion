@@ -1,0 +1,25 @@
+version: '3.5'
+services:
+  mongo:
+    container_name: mymongo
+    image: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: juana
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: notificacion
+  app:
+    container_name: notificacion
+    restart: always 
+    build: .
+    links:
+      - mongo
+    ports:
+      - "3000:8008"
+    volumes:
+      - .:/opt/src
+      - /opt/src/node_modules
+volumes:
+  mongodata:

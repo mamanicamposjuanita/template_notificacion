@@ -1,0 +1,128 @@
+<html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
+        integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="styles.css">
+    <title>Lista de Usuarios</title>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Listado de Usuarios</h2>
+        <hr>
+        <button class="btn-opciones btn-nuevo" onclick="irA('../registroUsuario/registro.html')">
+            <i class="fa-solid fa-plus"></i>
+            Nuevo Usuario
+        </button>
+        <br>
+        <br>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nro.</th>
+                    <th>Nombre Completo</th>
+                    <th>Departamento</th>
+                    <th>Tipo Usuario</th>
+                    <th>Usuario</th>
+                    <th>Fecha registro</th>
+                    <th>Opciones</th>
+                </tr>
+            </thead>
+            <tbody id="filas">
+
+            </tbody>
+        </table>
+    </div>
+</body>
+<script>
+
+    const irA = (ruta) => {
+        return window.location.href = ruta
+    }
+
+    window.onload = () => {
+        const token = localStorage.getItem('token')
+        console.log(token)
+        if (token === null) {
+            window.location.href = '../sesion/sesion.html'
+        }
+    }
+
+    const renderizarTabla = (datos) => {
+        let filas = document.getElementById('filas');
+        let filasFormateadas = datos.map((usuario,item) => 
+        `<tr>
+                <td>${item+1}</td>
+                <td>${usuario.nombre}</td>
+                <td>${usuario.departamento}</td>
+                <td>${usuario.tipo}</td>
+                <td>${usuario.usuario}</td>
+                <td>${usuario.fecha}</td>
+                <td>
+                    
+                    <button onclick=eliminarUsuario('${usuario.id}'); class="btn-opciones btn-eliminar">
+                        <i class="fa-solid fa-trash"></i>
+                        Eliminar
+                    </button>
+                </td>
+            </tr>`);
+        filas.innerHTML = filasFormateadas.join('');
+    }
+
+    
+    function eliminarUsuario(id) {
+        console.log(id)
+        const enviar = {
+            accion: "eliminar-usuario",
+            id: id,
+            token: localStorage.getItem('token')
+        }
+        socket.send(JSON.stringify(enviar))
+        socket.onmessage = (info) => {
+            const datosFormateados = JSON.parse(info.data);
+            console.log('----->', datosFormateados);
+            alert(datosFormateados.msg)
+            if (datosFormateados.ok) {
+                socket.send(JSON.stringify({ accion: 'listar-usuarios' }))
+                socket.onmessage = (info) => {
+                    const datosFormateados = JSON.parse(info.data);
+                    console.log('----->', datosFormateados);
+                    renderizarTabla(datosFormateados)
+                }
+            }
+
+        }
+    }
+    var socket;
+    window.onload = () => {
+        const servidor_url = 'ws://127.0.0.1:8008'
+        socket = new WebSocket(servidor_url)
+
+        // console.log('estado', socket.CONNECTING)
+        socket.onopen = (e) => {
+            console.log('Se realizo la conexion->', e);
+            socket.send(JSON.stringify({ accion: 'listar-usuarios' }))
+        }
+
+        socket.onerror = (e) => {
+            console.warn('errorrrr->', e)
+        }
+
+        socket.onmessage = (info) => {
+            const datosFormateados = JSON.parse(info.data);
+            console.log('----->', datosFormateados);
+            renderizarTabla(datosFormateados)
+        }
+    }
+
+
+</script>
+
+</html>

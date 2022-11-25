@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Principal</title>
+</head>
+
+<body>
+
+    <div class="contenedor">
+        <div class="card" onclick="ir('../listadoUsuario/listusuarios.html')">
+            <a href="../listadoUsuario/listusuarios.html">Listar Usuarios</a>
+        </div>
+
+        <div class="card" onclick="ir('../listadoNotif/listar.html')">
+            <a href="../listadoNotif/listar.html">Listar Notificaciones</a>
+        </div>
+
+        <div class="card" onclick="ir('../nuevaNotif/nuevaNotf.html')">
+            <a href="../nuevaNotif/nuevaNotf.html">Nueva Notificacion</a>
+        </div>
+
+        <div class="card" onclick="ir('../registroUsuario/registro.html')">
+            <a href="../registroUsuario/registro.html">Registro de Usuarios</a>
+        </div>
+
+    </div>
+
+    <script>
+        window.onload = () => {
+            const token = localStorage.getItem('token')
+            console.log(token)
+            if (token === null) {
+                window.location.href = '../sesion/sesion.html'
+            }
+        }
+        const ir = (pagina) => {
+            window.location.href = pagina
+        }
+    </script>
+
+</body>
+
+</html>

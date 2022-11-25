@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Nueva notificacion</title>
+</head>
+
+<body>
+    <div class="container">
+        <form onsubmit="enviar(event)">
+            <h2>Nueva notificacion</h2>
+            <div class="form-group">
+                <label for="titulo">Titulo:</label>
+                <input type="text" name="titulo" id="titulo">
+            </div>
+
+            <div class="form-group">
+                <label for="descripcion">Descripcion:</label>
+                <textarea name="descripcion" id="descripcion" cols="30" rows="4"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="tipo">Tipo:</label>
+                <select name="tipo" id="tipo">
+                    <option value="">Tipo de notificacion...</option>
+                    <option value="Urgente">Urgente</option>
+                    <option value="Informacion">Informacion</option>
+                    <option value="Advertencia">Advertencia</option>
+                    <option value="Error">Error</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="tipo">Unidad:</label>
+                <select name="unidad" id="unidad">
+                    <option value="">Para que unidad desea propagar</option>
+                    <option value="DSA">DSA</option>
+                    <option value="DAF">DAF</option>
+                    <option value="datacenter">DataCenter</option>
+                    <option value="DAF">Rectorado</option>
+                    <option value="DAF">Vicerectorado</option>
+                    <option value="DAF">Planificacion</option>
+                    <option value="DAF">Recursos Humanos</option>
+                    <option value="todos">Todos</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="fecha">Fecha:</label>
+                <input type="datetime-local" name="fecha" id="fecha">
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="Registrar">
+            </div>
+
+        </form>
+    </div>
+    <script>
+        // window.onload = ()=>{
+        //     console.log(1234567890)
+        // }
+        window.onload = () => {
+            const token = localStorage.getItem('token')
+            console.log(token)
+            if (token === null) {
+                window.location.href = '../sesion/sesion.html'
+            }
+        }
+
+        const enviar = (e) => {
+            e.preventDefault()
+            if (confirm('esta seguro de registrar??')) {
+                const datosFormulario = {
+                    titulo: e.target.titulo.value,
+                    descripcion: e.target.descripcion.value,
+                    tipo: e.target.tipo.value,
+                    unidad: e.target.unidad.value,
+                    fecha: e.target.fecha.value,
+                }
+
+                const token = localStorage.getItem('token')
+
+                const enviar = {
+                    accion: "registrar-notificacion",
+                    tipo: e.target.tipo.value,
+                    datos: datosFormulario,
+                    token: token
+                }
+                console.log('ENVIAR-->', enviar)
+
+                const ws = new WebSocket('ws://127.0.0.1:8008')
+                ws.onopen = () => {
+                    console.info('Conexion establecida')
+                    ws.send(JSON.stringify(enviar))
+                }
+
+                ws.onerror = () => {
+                    alert("Hubo un problema en la conexion con el servidor... intentelo mas tarde")
+                }
+
+                ws.onmessage = (data) => {
+                    console.log('DATOS RECIBIDOS-->', data)
+                    const respuesta = JSON.parse(data.data)
+                    if (respuesta.ok === true) {
+                        alert(respuesta.msg)
+                        window.location.href = '../listadoNotif/listar.html'
+                    }
+                    else{
+                        if(respuesta.tipo!=='emision'){
+                            
+                            alert(respuesta.msg)
+                            if(respuesta.msg === 'Usuario invalido') {
+                                localStorage.removeItem('token')
+                                return window.location.href = '../sesion/sesion.html' 
+                            }
+                        }
+                    }
+
+                }
+
+            }
+        }
+    </script>
+</body>
+
+</html>

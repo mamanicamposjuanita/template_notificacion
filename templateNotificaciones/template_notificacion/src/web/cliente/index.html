@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script> -->
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <title>Alerta</title>
+</head>
+
+<body>
+
+
+
+
+    <script>
+
+        window.onload = () => {
+            ws = new WebSocket('ws://10.10.164.144:8008')
+            ws.onopen = () => {
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Usted se conecto de manera correcta'
+                })
+                // document.write("holas")
+            }
+
+            ws.onerror = () => {
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+                Toast.fire({
+                    icon: 'warning',
+                    title: 'Huebo un problema en la conexion con el servidor: Intentelo mas tarde',
+                });
+            },
+
+            ws.onmessage = (data) => {
+                console.log(data)
+                const respuesta = JSON.parse(data.data)
+                if (respuesta.tipo === 'emision')
+                    return Swal.fire(respuesta.titulo , respuesta.descripcion, "success")
+            }
+        }
+
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Formulario de Registro Usuario</title>
+</head>
+
+<body>
+    <div class="container">
+        <form action="" onsubmit="enviar(event)">
+            <h2>Formulario de Registro</h2>
+            <div class="form-group">
+                <label for="nombre">Nombre completo:</label>
+                <input type="text" name="nombre" id="nombre">
+            </div>
+            <div class="form-group">
+                <label for="departamento">Departamento:</label>
+                <select name="departamento" id="departamento">
+                    <option value="">Departamento al que pertenece</option>
+                    <option value="DSA">DSA</option>
+                    <option value="DAF">DAF</option>
+                    <option value="datacenter">DataCenter</option>
+                    <option value="Rectorado">Rectorado</option>
+                    <option value="Vicerectorado">Vicerectorado</option>
+                    <option value="Planificacion">Planificacion</option>
+                    <option value="Recursos Humanos">Recursos Humanos</option> 
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="tipo">Tipo Usuario:</label>
+                <select name="tipo" id="tipo">
+                    <option value="">Cargo que ocupa</option>
+                    <option value="Administrador">Administrador</option>
+                    <option value="Emisor">Emisor</option>
+                    <option value="Secretaria">Secretaria</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="usuario">Usuario:</label>
+                <input type="text" name="usuario" id="usuario">
+            </div>
+            <div class="form-group">
+                <label for="contraseña">Contraseña:</label>
+                <input type="password" name="contraseña" id="contraseña">
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Registrar">
+            </div>
+        </form>
+    </div>
+
+    <script>
+        window.onload = () => {
+            const token = localStorage.getItem('token')
+            console.log(token)
+            if (token === null) {
+                window.location.href = '../sesion/sesion.html'
+            }
+        }
+
+        const enviar = (e) => {
+            e.preventDefault()
+            if (confirm('esta seguro de registrar??')) {
+                const datosFormulario = {
+                    nombre: e.target.nombre.value,
+                    departamento: e.target.departamento.value,
+                    tipo: e.target.tipo.value,
+                    usuario: e.target.usuario.value,
+                    contraseña: e.target.contraseña.value
+                }
+
+                const enviar = {
+                    accion: "registrar-usuario",
+                    tipo: e.target.tipo.value,
+                    datos: datosFormulario
+                }
+
+                const ws = new WebSocket('ws://127.0.0.1:8008')
+                ws.onopen = () => {
+                    console.info('Conexion establecida')
+                    ws.send(JSON.stringify(enviar))
+                }
+
+                ws.onerror = () => {
+                    alert("Hubo un problema en la conexion con el servidor... intentelo mas tarde")
+                }
+
+
+                ws.onmessage = (data) => {
+                    console.log('DATOS RECIBIDOS-->', data)
+                    const respuesta = JSON.parse(data.data)
+                    if (respuesta.ok === true) {
+                        alert(respuesta.msg)
+                        window.location.href = '../listadoUsuario/listusuarios.html'
+                    }
+                    else{
+                        alert(respuesta.msg)
+                        if(respuesta.msg === 'Usuario invalido') {
+                            localStorage.removeItem('token')
+                            return window.location.href = '../sesion/sesion.html' 
+                        }
+                    }
+
+                }
+
+            }
+        }
+    </script>
+
+</body>
+
+</html>
